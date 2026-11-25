@@ -1,0 +1,15 @@
+{
+  "name": "Miminet MCP with Firefox",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": { "password": "noPassword" }
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": { "label": "Miminet Firefox", "onAutoForward": "notify" }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "containerEnv": { "PLAYWRIGHT_BROWSERS_PATH": "0" },
+  "postCreateCommand": "python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && .venv/bin/python -m playwright install --with-deps firefox",
+  "waitFor": "postCreateCommand"
+}
