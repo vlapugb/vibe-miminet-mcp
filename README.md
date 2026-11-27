@@ -87,7 +87,8 @@ MCP использует штатные формы редактора, JWT и CS
 
 | Путь | Содержимое |
 | --- | --- |
-| [src/miminet_mcp/](src/miminet_mcp/) | Сервер, параметры действий и JavaScript для работы с редактором. |
+| [src/miminet_mcp/](src/miminet_mcp/) | `server.py` запускает MCP, `editor.py` реализует инструменты, `browser.py` управляет сессией Firefox, `actions.py` проверяет параметры действий. |
+| [src/miminet_mcp/scripts/](src/miminet_mcp/scripts/) | JavaScript, который Playwright выполняет в редакторе Miminet. |
 | [examples/demo.py](examples/demo.py) | Пример клиента, который создаёт и проверяет сеть через MCP. |
 | [tests/](tests/) | Проверки инструментов, запуска через stdio и работы в Firefox. |
 | [pyproject.toml](pyproject.toml) | Зависимости пакета и команда запуска `miminet-mcp`. |
