@@ -10,6 +10,6 @@
   },
   "otherPortsAttributes": { "onAutoForward": "ignore" },
   "containerEnv": { "PLAYWRIGHT_BROWSERS_PATH": "0" },
-  "postCreateCommand": "python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt && .venv/bin/python -m playwright install --with-deps firefox",
+  "postCreateCommand": "python -m venv .venv && .venv/bin/python -m pip install -e . && .venv/bin/python -m playwright install --with-deps firefox",
   "waitFor": "postCreateCommand"
 }

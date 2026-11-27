@@ -9,7 +9,7 @@ MCP-сервер для Codex, Claude Code, OpenCode и других клиен�
 **Попробовать в своём аккаунте:**
 
 1. [Создайте GitHub Codespace](https://codespaces.new/vlapugb/vibe-miminet-mcp) из ветки `main` и дождитесь установки Firefox и Python-пакетов.
-2. В терминале Codespace выполните `.venv/bin/python demo.py`. Демонстрация создаст в вашем аккаунте одну сеть с названием **MCP demo**.
+2. В терминале Codespace выполните `.venv/bin/python examples/demo.py`. Демонстрация создаст в вашем аккаунте одну сеть с названием **MCP demo**.
 3. В нижней панели **Ports** откройте порт **6080 · Miminet Firefox** через значок глобуса и нажмите **Connect**. Оставьте видимость порта **Private**: это рабочий стол с вашей сессией Miminet. Если порт отсутствует в списке, нажмите **Forward a Port** и введите `6080`.
 4. В открывшемся Firefox войдите на Miminet. Вернитесь в терминал и нажмите **Enter**. Через MCP демонстрация добавит коммутатор и два хоста, соединит их, задаст адреса `10.0.0.1/24` и `10.0.0.2/24`, заново откроет сеть и сверит данные. В терминале появятся **Verified two hosts** и ссылка. Её можно открыть и в обычном браузере под тем же аккаунтом.
 5. Нажмите **Enter** ещё раз, чтобы закрыть демонстрацию. По окончании остановите Codespace через меню GitHub. Сеть останется в разделе **Мои сети**.
@@ -22,31 +22,30 @@ MCP-сервер для Codex, Claude Code, OpenCode и других клиен�
 
 ```sh
 python3.12 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pip install -e .
 PLAYWRIGHT_BROWSERS_PATH=0 .venv/bin/python -m playwright install --with-deps firefox
 ```
 
-Из корня клона задайте два пути. Команду своего клиента можно выполнить из каталога проекта, в котором будете работать.
+Установка добавляет команду `miminet-mcp` в виртуальное окружение. Из корня клона сохраните её абсолютный путь. Затем команду подключения можно выполнить из любого каталога.
 
 ```sh
-MCP_SCRIPT="$(pwd)/server.py"
-MCP_PY="$(pwd)/.venv/bin/python"
+MCP_SERVER="$(pwd)/.venv/bin/miminet-mcp"
 ```
 
 | Клиент | Команда |
 | --- | --- |
-| Codex | `codex mcp add miminet -- "$MCP_PY" "$MCP_SCRIPT"` |
-| Claude Code | `claude mcp add --transport stdio miminet -- "$MCP_PY" "$MCP_SCRIPT"` |
-| OpenCode 2 | `opencode mcp add miminet -- "$MCP_PY" "$MCP_SCRIPT"` |
+| Codex | `codex mcp add miminet -- "$MCP_SERVER"` |
+| Claude Code | `claude mcp add --transport stdio miminet -- "$MCP_SERVER"` |
+| OpenCode 2 | `opencode mcp add miminet -- "$MCP_SERVER"` |
 
-Для OpenCode 1.x добавьте в `opencode.json` запись с абсолютными путями. Другим stdio-клиентам передайте те же исполняемый файл и аргумент. На Windows путь к интерпретатору заканчивается на `.venv\Scripts\python.exe`.
+Для OpenCode 1.x добавьте в `opencode.json` запись с абсолютным путём к команде. Другим stdio-клиентам передайте тот же путь. На Windows команда находится в `.venv\Scripts\miminet-mcp.exe`. Уже настроенные клиенты могут по-прежнему запускать корневой `server.py`. В существующем Codespace выполните `.venv/bin/python -m pip install -e .`, чтобы добавить новую команду для VS Code.
 
 ```json
 {
   "mcp": {
     "miminet": {
       "type": "local",
-      "command": ["/path/to/vibe-miminet-mcp/.venv/bin/python", "/path/to/vibe-miminet-mcp/server.py"]
+      "command": ["/path/to/vibe-miminet-mcp/.venv/bin/miminet-mcp"]
     }
   }
 }
@@ -84,9 +83,18 @@ MCP_PY="$(pwd)/.venv/bin/python"
 
 MCP использует штатные формы редактора, JWT и CSRF сайта. Исходники Miminet нужны только для интеграционного теста. Сайт по умолчанию включает просмотр новых сетей по ссылке. Редактор отправляет на сохранение полные списки узлов и связей, поэтому редактируйте одну сеть из одного окна. В другом браузере обновите вкладку для просмотра последних изменений. Если запись прервалась, сначала прочитайте схему. Изменение топологии может сбросить предыдущую эмуляцию. [Исходный проект Miminet](https://sourcecraft.dev/miminet/miminet)
 
+## Структура репозитория
+
+| Путь | Содержимое |
+| --- | --- |
+| [src/miminet_mcp/](src/miminet_mcp/) | Сервер, параметры действий и JavaScript для работы с редактором. |
+| [examples/demo.py](examples/demo.py) | Пример клиента, который создаёт и проверяет сеть через MCP. |
+| [tests/](tests/) | Проверки инструментов, запуска через stdio и работы в Firefox. |
+| [pyproject.toml](pyproject.toml) | Зависимости пакета и команда запуска `miminet-mcp`. |
+
 ## Тесты для разработчика
 
-Две проверки охватывают валидацию действий и обнаружение инструментов через stdio. Для третьей нужен клон исходного Miminet и его зависимости. В CI используется версия `987515cdda6c60b994391a60814946cf1adba3ae`. Тест работает в headless Firefox с временной SQLite и выполняет также сценарий `demo.py`.
+Две проверки охватывают валидацию действий и обнаружение инструментов через stdio. Для третьей нужен клон исходного Miminet и его зависимости. В CI используется версия `987515cdda6c60b994391a60814946cf1adba3ae`. Тест работает в headless Firefox с временной SQLite и выполняет также сценарий `examples/demo.py`.
 
 ```sh
 git clone https://git.sourcecraft.dev/miminet/miminet.git ../miminet-test-source
@@ -94,5 +102,5 @@ git -C ../miminet-test-source checkout --detach 987515cdda6c60b994391a60814946cf
 export MIMINET_SOURCE="$(cd ../miminet-test-source && pwd)"
 .venv/bin/python -m pip install uv
 .venv/bin/uv pip install --python .venv/bin/python -r "$MIMINET_SOURCE/front/pyproject.toml" pytest
-PLAYWRIGHT_BROWSERS_PATH=0 .venv/bin/python -m pytest -q test_server.py
+PLAYWRIGHT_BROWSERS_PATH=0 .venv/bin/python -m pytest -q tests/
 ```

@@ -3,7 +3,6 @@
 import asyncio
 import os
 import sys
-from pathlib import Path
 
 from mcp import Client
 from mcp.client.stdio import StdioServerParameters
@@ -71,7 +70,7 @@ async def main():
     )
     params = StdioServerParameters(
         command=sys.executable,
-        args=[str(Path(__file__).with_name("server.py").resolve())],
+        args=["-m", "miminet_mcp.server"],
         env={key: os.environ[key] for key in desktop if key in os.environ},
     )
     async with Client(params, read_timeout_seconds=90) as client:

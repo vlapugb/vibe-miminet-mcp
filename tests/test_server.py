@@ -3,7 +3,7 @@
 import asyncio
 import json
 import os
-import sys
+import sysconfig
 from contextlib import AsyncExitStack
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -14,9 +14,9 @@ from mcp import Client
 from mcp.client.stdio import StdioServerParameters
 from mcp.server.mcpserver.exceptions import ToolError
 
-from actions import ACTIONS, action_parameters
-from demo import create_example
-from server import Editor, make_server
+from examples.demo import create_example
+from miminet_mcp.actions import ACTIONS, action_parameters
+from miminet_mcp.server import Editor, make_server
 
 
 def test_device_action_arguments():
@@ -41,10 +41,11 @@ def test_device_action_arguments():
             action_parameters(action, values)
 
 
-def test_stdio():
+def test_stdio(tmp_path):
     async def check():
         params = StdioServerParameters(
-            command=sys.executable, args=[str(Path(__file__).with_name("server.py"))]
+            command=str(Path(sysconfig.get_path("scripts")) / "miminet-mcp"),
+            cwd=str(tmp_path),
         )
         async with Client(params, read_timeout_seconds=10) as agent:
             tools = {tool.name for tool in (await agent.list_tools()).tools}
